@@ -1,0 +1,97 @@
+
+
+function doPost(e) {
+
+  const sheetName = 'NOTI POP UP';
+
+  const headers = ['ID', 'FECHA', 'TOKEN', 'FECHA Y HORA PROGRAMADA', 'TITULO', 'NOTIFICACION', 'URL', 'LOGO'];
+
+
+  try {
+
+    const sheet = createOrGetSheet(sheetName, headers);
+
+    
+
+    // Convierte la carga del POST a un objeto JSON
+
+    const data = JSON.parse(e.postData.contents);
+
+
+    // Genera un ID único y la fecha actual
+
+    const uniqueId = Utilities.getUuid();
+
+    const currentDate = new Date().toLocaleString();
+
+
+    // Extrae los datos del JSON, usa valores por defecto si no están presentes
+
+    const token = data.token || '';
+
+    const fechaHoraProgramada = data.fechaHoraProgramada || '';
+
+    const titulo = data.titulo || '';
+
+    const notificacion = data.notificacion || '';
+
+    const url = data.url || '';
+
+    const logo = data.logo || '';
+
+
+    // Inserta los datos en la hoja
+
+    sheet.appendRow([uniqueId, currentDate, token, fechaHoraProgramada, titulo, notificacion, url, logo]);
+
+
+    // Responde con un mensaje de éxito
+
+    return ContentService.createTextOutput('Datos añadidos correctamente').setMimeType(ContentService.MimeType.TEXT);
+
+  } catch (error) {
+
+    // Maneja errores y responde con un mensaje de error
+
+    return ContentService.createTextOutput('Error: ' + error.message).setMimeType(ContentService.MimeType.TEXT);
+
+  }
+
+}
+
+
+// Función para crear la hoja si no existe y agregar los encabezados
+
+function createOrGetSheet(sheetName, headers) {
+
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+
+  let sheet = spreadsheet.getSheetByName(sheetName);
+
+
+  // Crea la hoja si no existe
+
+  if (!sheet) {
+
+    sheet = spreadsheet.insertSheet(sheetName);
+
+    sheet.appendRow(headers);
+
+  } else {
+
+    // Si la hoja existe pero está vacía, agrega los encabezados
+
+    if (sheet.getLastRow() === 0) {
+
+      sheet.appendRow(headers);
+
+    }
+
+  }
+
+
+  return sheet;
+
+}
+
+
